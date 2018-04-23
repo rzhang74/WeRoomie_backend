@@ -89,7 +89,7 @@ def app_register(request):
         return Response(status=status.HTTP_409_CONFLICT)
 
 @api_view(['POST'])
-@permission_classes((IsAuthenticated,))
+# @permission_classes((IsAuthenticated,))
 def app_logout(request):
     logout(request._request)
     request.user.auth_token.delete()
@@ -108,19 +108,18 @@ def get_apt_by_name(request):
 
 @api_view(['GET'])
 @parser_classes((JSONParser,)) 
-@permission_classes((IsAuthenticated,))
+# @permission_classes((IsAuthenticated,))
 def get_apt_by_id(request):
     aid = request.query_params.get('aid')
-    apts = Apartment.objects.filter(aid=aid)
-    if len(apts) > 0:
-        apt = apts[0]
+    apts = Apartment.objects.raw("Select * From app_basic_apartment Where aid = "+aid) 
+    for apt in apts:
         apt_ser = ApartmentSerializer(apt)
         return JsonResponse(apt_ser.data, safe=True)
-    else:
-        return JsonResponse({}, safe=True, status=status.HTTP_404_NOT_FOUND)
+    return JsonResponse({}, safe=True, status=status.HTTP_404_NOT_FOUND)
+    
 ## ---------------------------------- User Info Related -------------------------------
 @api_view(['POST'])
-@permission_classes((IsAuthenticated,))
+# @permission_classes((IsAuthenticated,))
 def become_advance(request):
     u = request._request.user
     gender = request.data.get('gender')
@@ -145,7 +144,7 @@ def become_advance(request):
     
 
 @api_view(['GET'])
-@permission_classes((IsAuthenticated,))
+# @permission_classes((IsAuthenticated,))
 def get_personal_info(request):
     u = request._request.user
     adv_u = AdvancedUser.objects.get(uid=u)
@@ -153,7 +152,7 @@ def get_personal_info(request):
     return JsonResponse(adv_ser.data)
 
 @api_view(['GET'])
-# @permission_classes((IsAuthenticated,))
+@permission_classes((IsAuthenticated,))
 def get_user_info(request):
     uname = request.data.get('username')
     users = User.objects.filter(username=uname)
@@ -170,7 +169,7 @@ def get_user_info(request):
 
 ## -------------------------------- User Group Potential Match ------------------------
 @api_view(['POST'])
-@permission_classes((IsAuthenticated,))
+# @permission_classes((IsAuthenticated,))
 def add_potential_match(request):
     u = request._request.user
     gid = request.data.get('gid')
@@ -195,7 +194,7 @@ def add_potential_match(request):
 
 
 @api_view(['GET'])
-@permission_classes((IsAuthenticated,))
+# @permission_classes((IsAuthenticated,))
 def get_potential_match(request):
     u = request._request.user
     adv_u = AdvancedUser.objects.get(uid=u)
@@ -206,7 +205,7 @@ def get_potential_match(request):
     return JsonResponse(ret, safe=False)
 
 @api_view(['DELETE'])
-@permission_classes((IsAuthenticated,))
+# @permission_classes((IsAuthenticated,))
 def delete_potential_match(request):
     u = request._request.user
     pid = request.data.get('pid')
@@ -216,7 +215,7 @@ def delete_potential_match(request):
 ## -------------------------------- Group Related Operation ---------------------------
 #gender=1&quietness=5&sanitary=5&timetobed=5&pet=1
 @api_view(['GET'])
-#@permission_classes((IsAuthenticated,))
+@permission_classes((IsAuthenticated,))
 def filter_group(request):
     gender = int(request.query_params.get('gender'))
     timetobed = int(request.query_params.get('timetobed'))
@@ -246,7 +245,7 @@ def filter_group(request):
 
 
 @api_view(['POST'])
-@permission_classes((IsAuthenticated,))
+# @permission_classes((IsAuthenticated,))
 def create_group(request):
     user = request._request.user
     if len(AdvancedUser.objects.filter(uid=user)) == 0:
@@ -277,7 +276,7 @@ def create_group(request):
 
 
 @api_view(['POST'])
-@permission_classes((IsAuthenticated,))
+# @permission_classes((IsAuthenticated,))
 def add_to_group(request):
     user = request._request.user
     if len(AdvancedUser.objects.filter(uid=user)) == 0:
@@ -300,7 +299,7 @@ def add_to_group(request):
 
 
 @api_view(['POST'])
-@permission_classes((IsAuthenticated,))
+# @permission_classes((IsAuthenticated,))
 def leave_from_group(request):
     user = request._request.user
     if len(AdvancedUser.objects.filter(uid=user)) == 0:
@@ -334,7 +333,7 @@ def leave_from_group(request):
     return Response(status=status.HTTP_202_ACCEPTED)
 
 @api_view(['GET'])
-@permission_classes((IsAuthenticated,))
+# @permission_classes((IsAuthenticated,))
 def get_group_info(request):
     gid = request.query_params.get('gid')
     group = Group.objects.get(gid=gid)
